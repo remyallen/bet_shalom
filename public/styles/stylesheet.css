@@ -185,17 +185,15 @@ tr td {
 
 .btn-danger {
     box-shadow: 3px 3px 3px #2b1913;
-
 }
+
 .btn-warning {
     box-shadow: 3px 3px 3px #2b1913;
-
 }
 
 .lesson-plan-container {
     margin-top: 35px;
 }
-
 
 #uploadedFile {
     width: 100%;
@@ -209,6 +207,5 @@ tr td {
 
 .comments-table {
     box-shadow: 3px 3px 3px #2b1913;
-
 }
 
