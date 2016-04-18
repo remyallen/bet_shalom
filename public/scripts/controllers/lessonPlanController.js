@@ -20,6 +20,8 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
   $scope.teacherEditState = false;
   $scope.adminEditState = false;
 
+  $scope.commentButton = true;
+
   /*
    * boolean variables for button ng-if
    */
@@ -66,29 +68,42 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
     $scope.statusAdminReview = true;
     $scope.needsReviewButton = true;
     $scope.removeButton = true;
+    if($scope.loggedInUser.role === 'admin') {
+      $scope.commentForm = true;
+      $scope.commentButton = false;
+    }
   }
   if($scope.dataFactory.factoryLessonStatus == 'published') {
     $scope.statusToCheckIfPublished = true;
     $scope.statusAdminReview = true;
     $scope.needsReviewButton = false;
     $scope.removeButton = true;
+    $scope.commentForm = true;
   }
   $scope.dataFactory.factoryLessonStatus = undefined;
 
 
   //Checks to see if the page should be editable and if so populates it based on the stored lesson id
   if ($scope.loadSavedLesson === true) {
-    $scope.commentForm = true;
+
     $scope.dataFactory.factoryGetLessonPlan($scope.lessonPlanId).then(function() {
       $scope.savedLessonPlan = $scope.dataFactory.factoryLessonPlan();
       /*
        * Sets lessonPlanStatus to the 'status' property coming back from the database.
        * This allows the 'Publish' button to determine whether to POST or PUT. -Savio
        */
-      console.log('why', $scope.savedLessonPlan);
       $scope.lessonPlanStatus = $scope.savedLessonPlan[0].status;
-      console.log($scope.lessonPlanStatus);
-      console.log('What we want from the returned variable in data factory', $scope.savedLessonPlan);
+
+      //if($scope.lessonPlanStatus === 'draft' || $scope.lessonPlanStatus === 'submitted') {
+      //  if ($scope.loggedInUser.role === 'admin'){
+      //    console.log('role:', $scope.loggedInUser.role);
+      //    $scope.commentForm = true;
+      //  } else {
+      //    $scope.commentForm = false;
+      //  }
+      //} else {
+      //  $scope.commentForm = false;
+      //}
 
       populateLessonForEdit();
       checkFav();
@@ -173,11 +188,50 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
   $scope.adminPublishLesson = function(size) {
 
     if (Object.keys($scope.selectedTag).length == 0) {
-      alert('No Tags');
+      var modalInstance = $uibModal.open({
+        animation: $scope.animationsEnabled,
+        templateUrl: 'modalNoTags.html',
+        controller: 'ModalController',
+        size: size,
+        resolve: {
+          myUsername: function () {
+            return $scope.username;
+          },
+          currentLessonPlan: function () {
+            return $scope.lesson_title;
+          }
+        }
+      });
+
+      modalInstance.result.then(function () {
+
+      }, function () {
+        $log.info('Modal dismissed at: ' + new Date());
+      });
+
     } else {
       console.log('Has Tags');
       if (Object.keys($scope.lesson_title).length == 0) {
-        alert('No Title');
+        var modalInstance = $uibModal.open({
+          animation: $scope.animationsEnabled,
+          templateUrl: 'modalNoTitle.html',
+          controller: 'ModalController',
+          size: size,
+          resolve: {
+            myUsername: function () {
+              return $scope.username;
+            },
+            currentLessonPlan: function () {
+              return $scope.lesson_title;
+            }
+          }
+        });
+
+        modalInstance.result.then(function () {
+
+        }, function () {
+          $log.info('Modal dismissed at: ' + new Date());
+        });
       } else {
         console.log('Has Title');
         var modalInstance = $uibModal.open({
@@ -185,10 +239,12 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
           templateUrl: 'modalPublish.html',
           controller: 'ModalController',
           size: size,
-          //no idea what the resolve is for, but it errors out without it. that's why it's set to 'holidays' for no reason
           resolve: {
-            holidays: function () {
-              return $scope.holidays;
+            myUsername: function () {
+              return $scope.username;
+            },
+            currentLessonPlan: function () {
+              return $scope.lesson_title;
             }
           }
         });
@@ -218,12 +274,51 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
     //function to handle the database call (teacher only button)
   $scope.teacherSubmitLesson = function(size) {
 
-      if (Object.keys($scope.selectedTag).length == 0) {
-        alert('No Tags');
-      } else {
-        console.log('Has Tags');
-        if (Object.keys($scope.lesson_title).length == 0) {
-          alert('No Title');
+    if (Object.keys($scope.selectedTag).length == 0) {
+      var modalInstance = $uibModal.open({
+        animation: $scope.animationsEnabled,
+        templateUrl: 'modalNoTags.html',
+        controller: 'ModalController',
+        size: size,
+        resolve: {
+          myUsername: function () {
+            return $scope.username;
+          },
+          currentLessonPlan: function () {
+            return $scope.lesson_title;
+          }
+        }
+      });
+
+      modalInstance.result.then(function () {
+
+      }, function () {
+        $log.info('Modal dismissed at: ' + new Date());
+      });
+
+    } else {
+      console.log('Has Tags');
+      if (Object.keys($scope.lesson_title).length == 0) {
+        var modalInstance = $uibModal.open({
+          animation: $scope.animationsEnabled,
+          templateUrl: 'modalNoTitle.html',
+          controller: 'ModalController',
+          size: size,
+          resolve: {
+            myUsername: function () {
+              return $scope.username;
+            },
+            currentLessonPlan: function () {
+              return $scope.lesson_title;
+            }
+          }
+        });
+
+        modalInstance.result.then(function () {
+
+        }, function () {
+          $log.info('Modal dismissed at: ' + new Date());
+        });
         } else {
           console.log('Has Title');
           var modalInstance = $uibModal.open({
@@ -231,10 +326,12 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
             templateUrl: 'modalTeacherSubmit.html',
             controller: 'ModalController',
             size: size,
-            //no idea what the resolve is for, but it errors out without it. that's why it's set to 'holidays' for no reason
             resolve: {
-              holidays: function () {
-                return $scope.holidays;
+              myUsername: function () {
+                return $scope.username;
+              },
+              currentLessonPlan: function () {
+                return $scope.lesson_title;
               }
             }
           });
@@ -259,31 +356,81 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
 
   //When the save draft button is clicked redirects to the function to save a new draft or update existing draft
   $scope.saveLessonDraft = function(size) {
-    if (Object.keys($scope.lessonPlanStatus).length == 0) {
-      $scope.lessonPlanStatus = 'draft';
-      $scope.submitLesson();
-    } else {
-      $scope.lessonPlanStatus = 'draft';
-      $scope.editLesson();
-    }
-    var modalInstance = $uibModal.open({
-      animation: $scope.animationsEnabled,
-      templateUrl: 'modalSaveDraft.html',
-      controller: 'ModalController',
-      size: size,
-      //no idea what the resolve is for, but it errors out without it. that's why it's set to 'holidays' for no reason
-      resolve: {
-        holidays: function () {
-          return $scope.holidays;
+    if (Object.keys($scope.selectedTag).length == 0) {
+      var modalInstance = $uibModal.open({
+        animation: $scope.animationsEnabled,
+        templateUrl: 'modalNoTags.html',
+        controller: 'ModalController',
+        size: size,
+        resolve: {
+          myUsername: function () {
+            return $scope.username;
+          },
+          currentLessonPlan: function () {
+            return $scope.lesson_title;
+          }
         }
+      });
+
+      modalInstance.result.then(function () {
+
+      }, function () {
+        $log.info('Modal dismissed at: ' + new Date());
+      });
+
+    } else {
+      console.log('Has Tags');
+      if (Object.keys($scope.lesson_title).length == 0) {
+        var modalInstance = $uibModal.open({
+          animation: $scope.animationsEnabled,
+          templateUrl: 'modalNoTitle.html',
+          controller: 'ModalController',
+          size: size,
+          resolve: {
+            myUsername: function () {
+              return $scope.username;
+            },
+            currentLessonPlan: function () {
+              return $scope.lesson_title;
+            }
+          }
+        });
+
+        modalInstance.result.then(function () {
+
+        }, function () {
+          $log.info('Modal dismissed at: ' + new Date());
+        });
+      } else {
+        if (Object.keys($scope.lessonPlanStatus).length == 0) {
+          $scope.lessonPlanStatus = 'draft';
+          $scope.submitLesson();
+        } else {
+          $scope.lessonPlanStatus = 'draft';
+          $scope.editLesson();
+        }
+        var modalInstance = $uibModal.open({
+          animation: $scope.animationsEnabled,
+          templateUrl: 'modalSaveDraft.html',
+          controller: 'ModalController',
+          size: size,
+          resolve: {
+            myUsername: function () {
+              return $scope.username;
+            },
+            currentLessonPlan: function () {
+              return $scope.lesson_title;
+            }
+          }
+        });
+
+        modalInstance.result.then(function () {
+
+        }, function () {
+          $log.info('Modal dismissed at: ' + new Date());
+        });
       }
-    });
-
-    modalInstance.result.then(function () {
-
-    }, function () {
-      $log.info('Modal dismissed at: ' + new Date());
-    });
+    }
   };
 
   //When the needs review button is clicked changes the status to reflect that and calls the function to update the
@@ -295,10 +442,12 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
       templateUrl: 'modalNeedsReview.html',
       controller: 'ModalController',
       size: size,
-      //no idea what the resolve is for, but it errors out without it. that's why it's set to 'holidays' for no reason
       resolve: {
-        holidays: function () {
-          return $scope.holidays;
+        myUsername: function () {
+          return $scope.username;
+        },
+        currentLessonPlan: function () {
+          return $scope.lesson_title;
         }
       }
     });
@@ -393,10 +542,12 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
       templateUrl: 'modalDelete.html',
       controller: 'ModalController',
       size: size,
-      //no idea what the resolve is for, but it errors out without it. that's why it's set to 'holidays' for no reason
       resolve: {
-        holidays: function () {
-          return $scope.holidays;
+        myUsername: function () {
+          return $scope.username;
+        },
+        currentLessonPlan: function () {
+          return $scope.lesson_title;
         }
       }
     });
@@ -457,6 +608,9 @@ myApp.controller('LessonPlanController', ['$scope', '$http', '$route', 'Passport
 
     if ($scope.savedLessonPlan[0].materials == true) {
       $scope.required_materials = true;
+    }
+    if ($scope.savedLessonPlan[0].resource == true){
+      $scope.type_selector = "resource";
     }
     $scope.lesson_author = $scope.savedLessonPlan[0].author;
     $scope.lesson_title = $scope.savedLessonPlan[0].title;
