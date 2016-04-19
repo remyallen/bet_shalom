@@ -3,16 +3,16 @@ var router = express.Router();
 var passport = require('passport');
 var pg = require('pg');
 var connection = require('../modules/connection');
-var sendgrid  = require('sendgrid')('');
+var sendgrid  = require('sendgrid')('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');
 
 router.post('/', function(req, res) {
 
     function email() {
         var email     = new sendgrid.Email({
             to:       req.body.username,
-            from:     'john.rachuy@gmail.com',
+            from:     'teacherapp@betshalom.org',
             subject:  'Welcome to Bet Shalom',
-            text:     'Click on the link to set a password and login http://localhost:5000/#/password/' + req.body.token
+            text:     'Click on the link to set a password and login http://betshalom.herokuapp.com/#/password/' + req.body.token
         });
         sendgrid.send(email, function(err, json) {
 
